@@ -3,7 +3,6 @@ create database db_filmes_20261_a;
 
 #ativa ao o uso database de filmes
 use  db_filmes_20261_a;
-
 #cria a tabela de filme
 create table tbl_filme (
 	id int not null primary key auto_increment,
@@ -72,3 +71,9 @@ update tbl_filme set
 	valor = "100.50",
 	capa = "wadwwawdd"
 where id = 12;
+
+show tables;
+CREATE TABLE tbl_nacionalidade (
+    id int not null primary key auto_increment,
+    nome VARCHAR(50)  NOT NULL
+);
