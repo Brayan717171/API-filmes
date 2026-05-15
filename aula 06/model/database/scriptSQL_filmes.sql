@@ -59,7 +59,7 @@ WHERE id = 11;
 UPDATE tbl_filme SET id = 3 WHERE id = 5;
 
 
-desc tbl_filme;
+
 
 
 update tbl_filme set
@@ -75,5 +75,12 @@ where id = 12;
 show tables;
 CREATE TABLE tbl_nacionalidade (
     id int not null primary key auto_increment,
-    nome VARCHAR(50)  NOT NULL
+    nome VARCHAR(50) 
+);
+
+
+
+CREATE TABLE tbl_atividade (
+    id int not null primary key auto_increment,
+    nome VARCHAR(45)  
 );

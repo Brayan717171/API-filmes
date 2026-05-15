@@ -22,10 +22,11 @@ const bodyParser = require('body-parser');
 
 //Import das controllers do projeto
 const controllerFilme               = require('./controller/filme/controller_filme.js')
-const controllerPersonagens        = require('./controller/personagens/controller_personagens.js')
+const controllerPersonagens         = require('./controller/personagens/controller_personagens.js')
 const controllerGenero              = require('./controller/generos/controller_generos.js')
 const controllerSexo                = require('./controller/sexo/controller_sexo.js')
 const controllerNacionalidade       = require('./controller/nacionalidade/controller_nacionalidades.js')
+const controllerAtividade           = require('./controller/atividade/controller_atividade.js')
 
 
 //Criando um objeto para manipular dados do body da API em formato JSON
@@ -350,6 +351,79 @@ app.delete('/v1/senai/sexo/:id', async function (req, res){
     //Chama a função de atualizar na controller e encaminha os dados, id e content type
     //obedecendo a ordem de crição na função da controller
     let result = await controllerSexo.excluirSexo(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+//#########################################
+//              ATIVIDADE
+//#########################################
+
+
+app.post('/v1/senai/atividade', bodyParserJSON , async function (req, res){
+
+    
+
+    let dados = req.body
+
+    let contentType = req.headers['content-type']
+
+    let result = await controllerAtividade.inseirNovaAtividade(dados,contentType)
+
+    res.status(result.status_code).json(result)
+
+})
+
+
+app.get('/v1/senai/atividade', async function (req, res){
+
+    let result = await controllerAtividade.listarAtividade()
+
+    res.status(result.status_code)
+    res.json(result)
+ 
+
+})
+
+app.get('/v1/senai/atividade/:id', async function (req, res){
+    let id = req.params.id
+    
+    let result = await controllerAtividade.buscarAtividade(id)
+
+    res.status(result.status_code)
+    res.json(result)
+    
+
+})
+
+
+app.put('/v1/senai/atividade/:id', bodyParserJSON, async function (req, res){
+    //Recebe o contenty type da requisição
+    let contentType = req.headers['content-type']
+    //Recebe o ID do registro a ser atualizado
+    let id = req.params.id
+    //Recebe os dados enviados no corpo da requisição
+    let dados = req.body
+
+    //Chama a função de atualizar na controller e encaminha os dados, id e content type
+    //obedecendo a ordem de crição na função da controller
+    let result = await controllerAtividade.atualizarAtividade(dados, id, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+app.delete('/v1/senai/atividade/:id', async function (req, res){
+
+    //Recebe o ID do registro a ser deletado
+    let id = req.params.id
+
+
+    //Chama a função de atualizar na controller e encaminha os dados, id e content type
+    //obedecendo a ordem de crição na função da controller
+    let result = await controllerAtividade.excluirAtividade(id)
 
     res.status(result.status_code)
     res.json(result)
