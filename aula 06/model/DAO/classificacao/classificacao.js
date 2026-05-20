@@ -1,38 +1,29 @@
 /**************************************************************************************************************************************************************************
  * Objetivo: Arquivo responsável pelo CRUD no Banco de Dados MYSQL na tabela
- *              Filme
- * Data: 15/ 04/ 2026
+ *              Classificacao
+ * Data: 20/05/2026
  * Autor: Brayan
- * Verão: 1.0
+ * Versão: 1.0
  **************************************************************************************************************************************************************************/
+
 const knex = require('knex')
 const knexConfig = require('../../database_config_knex/knexFile')
 
 const knexConex = knex(knexConfig.development)
 
 
-const incertFilme = async function(filme){
+const incertClassificacao = async function(classificacao){
     try {
         let sql = `
-        insert into tbl_filme (
+        insert into tbl_classificacao (
             nome,
-            data_lancamento,
-            duracao, 
-            sinopse, 
-            avaliacao, 
-            valor, 
-            capa,
-            id_classificacao
+            sigla,
+            descricao
             )
         values (
-            '${filme.nome}',
-            '${filme.data_lancamento}',
-            '${filme.duracao}',
-            '${filme.sinopse}',
-            if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
-            '${filme.valor}',
-            '${filme.capa}',
-            ${filme.id_classificacao}
+            '${classificacao.nome}',
+            '${classificacao.sigla}',
+            '${classificacao.descricao}'
             );`
 
         let result = await knexConex.raw(sql)
@@ -48,19 +39,14 @@ const incertFilme = async function(filme){
 }
 
 
-const updateFilme = async function(filme){
+const updateClassificacao = async function(classificacao){
     try {
         let sql = `
-            update tbl_filme set
-            nome =              '${filme.nome}',
-            data_lancamento =   '${filme.data_lancamento}', 
-            duracao =           '${filme.duracao}',
-            sinopse =           '${filme.sinopse}',
-            avaliacao =         if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'),
-            valor =             '${filme.valor}',
-            capa =              '${filme.capa}',
-            id_classificacao =   ${filme.id_classificacao}
-            where id =           ${filme.id};
+            update tbl_classificacao set
+            nome =       '${classificacao.nome}',
+            sigla =      '${classificacao.sigla}',
+            descricao =  '${classificacao.descricao}'
+            where id =    ${classificacao.id};
         `
         let result = await knexConex.raw(sql)
 
@@ -75,9 +61,9 @@ const updateFilme = async function(filme){
 }
 
 
-const selectAllFilme = async function(){
+const selectAllClassificacao = async function(){
     try {
-        let sql = `select * from tbl_filme order by id desc`
+        let sql = `select * from tbl_classificacao order by id desc`
 
         let result = await knexConex.raw(sql)
 
@@ -93,9 +79,9 @@ const selectAllFilme = async function(){
 }
 
 
-const selectByIdFilme = async function(id){
+const selectByIdClassificacao = async function(id){
     try {
-        let sql = `select * from tbl_filme where id=${id}`
+        let sql = `select * from tbl_classificacao where id=${id}`
 
         let result = await knexConex.raw(sql)
 
@@ -111,10 +97,10 @@ const selectByIdFilme = async function(id){
 }
 
 
-const deleteFilme = async function(id){
+const deleteClassificacao = async function(id){
     try {
         let sql = `
-            DELETE FROM tbl_filme 
+            DELETE FROM tbl_classificacao
             WHERE id = ${id};
         `
         let result = await knexConex.raw(sql)
@@ -130,9 +116,9 @@ const deleteFilme = async function(id){
 }
 
 module.exports = {
-    incertFilme,
-    updateFilme,
-    selectAllFilme,
-    selectByIdFilme,
-    deleteFilme,
+    incertClassificacao,
+    updateClassificacao,
+    selectAllClassificacao,
+    selectByIdClassificacao,
+    deleteClassificacao
 }

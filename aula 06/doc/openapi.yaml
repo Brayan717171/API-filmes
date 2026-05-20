@@ -763,6 +763,234 @@ paths:
 
 
 
+  # ==================== CLASSIFICACAO ====================
+  /v1/senai/classificacao:
+    post:
+      tags:
+        - Classificação
+      summary: Adiciona uma nova classificação
+      description: Adiciona uma nova classificação indicativa no banco de dados
+      requestBody:
+        description: JSON contendo os dados da nova classificação
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificacaoInput'
+        required: true
+      responses:
+        '201':
+          description: Classificação criada com sucesso
+        '400':
+          description: Dados inválidos
+        '415':
+          description: Content-Type inválido
+        '500':
+          description: Erro interno no servidor
+
+    get:
+      tags:
+        - Classificação
+      summary: Lista todas as classificações
+      description: Retorna todas as classificações cadastradas no sistema
+      responses:
+        '200':
+          description: Listagem realizada com sucesso
+        '404':
+          description: Nenhuma classificação encontrada
+        '500':
+          description: Erro interno no servidor
+
+  /v1/senai/classificacao/{id}:
+    get:
+      tags:
+        - Classificação
+      summary: Busca uma classificação pelo ID
+      description: Retorna uma única classificação com base no ID informado
+      parameters:
+        - name: id
+          in: path
+          description: ID da classificação a ser buscada
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Classificação encontrada
+        '400':
+          description: ID inválido
+        '404':
+          description: Classificação não encontrada
+        '500':
+          description: Erro interno no servidor
+
+    put:
+      tags:
+        - Classificação
+      summary: Atualiza uma classificação pelo ID
+      description: Localiza e atualiza os dados de uma classificação pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID da classificação a ser atualizada
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Dados atualizados da classificação
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificacaoInput'
+        required: true
+      responses:
+        '200':
+          description: Classificação atualizada com sucesso
+        '400':
+          description: Dados ou ID inválidos
+        '404':
+          description: Classificação não encontrada
+        '415':
+          description: Content-Type inválido
+        '500':
+          description: Erro interno no servidor
+
+    delete:
+      tags:
+        - Classificação
+      summary: Exclui uma classificação pelo ID
+      description: Remove uma classificação do banco de dados pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID da classificação a ser excluída
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Classificação excluída com sucesso
+        '400':
+          description: ID inválido
+        '404':
+          description: Classificação não encontrada
+        '500':
+          description: Erro interno no servidor
+
+
+  # ==================== PESSOA ====================
+  /v1/senai/pessoa:
+    post:
+      tags:
+        - Pessoa
+      summary: Adiciona uma nova pessoa
+      description: Adiciona uma nova pessoa no banco de dados
+      requestBody:
+        description: JSON contendo os dados da nova pessoa
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PessoaInput'
+        required: true
+      responses:
+        '201':
+          description: Pessoa criada com sucesso
+        '400':
+          description: Dados inválidos
+        '415':
+          description: Content-Type inválido
+        '500':
+          description: Erro interno no servidor
+
+    get:
+      tags:
+        - Pessoa
+      summary: Lista todas as pessoas
+      description: Retorna todas as pessoas cadastradas no sistema
+      responses:
+        '200':
+          description: Listagem realizada com sucesso
+        '404':
+          description: Nenhuma pessoa encontrada
+        '500':
+          description: Erro interno no servidor
+
+  /v1/senai/pessoa/{id}:
+    get:
+      tags:
+        - Pessoa
+      summary: Busca uma pessoa pelo ID
+      description: Retorna uma única pessoa com base no ID informado
+      parameters:
+        - name: id
+          in: path
+          description: ID da pessoa a ser buscada
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pessoa encontrada
+        '400':
+          description: ID inválido
+        '404':
+          description: Pessoa não encontrada
+        '500':
+          description: Erro interno no servidor
+
+    put:
+      tags:
+        - Pessoa
+      summary: Atualiza uma pessoa pelo ID
+      description: Localiza e atualiza os dados de uma pessoa pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID da pessoa a ser atualizada
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Dados atualizados da pessoa
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PessoaInput'
+        required: true
+      responses:
+        '200':
+          description: Pessoa atualizada com sucesso
+        '400':
+          description: Dados ou ID inválidos
+        '404':
+          description: Pessoa não encontrada
+        '415':
+          description: Content-Type inválido
+        '500':
+          description: Erro interno no servidor
+
+    delete:
+      tags:
+        - Pessoa
+      summary: Exclui uma pessoa pelo ID
+      description: Remove uma pessoa do banco de dados pelo ID
+      parameters:
+        - name: id
+          in: path
+          description: ID da pessoa a ser excluída
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pessoa excluída com sucesso
+        '400':
+          description: ID inválido
+        '404':
+          description: Pessoa não encontrada
+        '500':
+          description: Erro interno no servidor
+
+
 # ==================== SCHEMAS ====================
 components:
   schemas:
@@ -770,30 +998,40 @@ components:
     FilmeInput:
       required:
         - nome
+        - data_lancamento
+        - duracao
         - sinopse
+        - valor
+        - capa
+        - id_classificacao
       type: object
       properties:
         nome:
           type: string
+          maxLength: 80
           example: Matrix
-        sinopse:
-          type: string
-          example: Um hacker descobre a verdade sobre sua realidade
         data_lancamento:
           type: string
           example: '1999-03-31'
         duracao:
           type: string
           example: '02:16:00'
-        valor:
+        sinopse:
           type: string
-          example: '19.90'
+          example: Um hacker descobre a verdade sobre sua realidade
         avaliacao:
-          type: string
-          example: '8.7'
+          type: number
+          example: 8.7
+        valor:
+          type: number
+          example: 19.90
         capa:
           type: string
+          maxLength: 255
           example: 'https://exemplo.com/capa.jpg'
+        id_classificacao:
+          type: integer
+          example: 1
 
     SexoInput:
       required:
@@ -847,3 +1085,45 @@ components:
           type: string
           maxLength: 45
           example: Ator
+
+    ClassificacaoInput:
+      required:
+        - nome
+        - sigla
+        - descricao
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 50
+          example: Livre
+        sigla:
+          type: string
+          maxLength: 5
+          example: L
+        descricao:
+          type: string
+          maxLength: 200
+          example: Conteúdo adequado para todas as idades
+
+    PessoaInput:
+      required:
+        - nome
+        - data_nascimento
+        - idade
+        - id_sexo
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 50
+          example: Brayan
+        data_nascimento:
+          type: string
+          example: '2009-02-23'
+        idade:
+          type: integer
+          example: 17
+        id_sexo:
+          type: integer
+          example: 1

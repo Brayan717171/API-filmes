@@ -27,8 +27,8 @@ const controllerGenero              = require('./controller/generos/controller_g
 const controllerSexo                = require('./controller/sexo/controller_sexo.js')
 const controllerNacionalidade       = require('./controller/nacionalidade/controller_nacionalidades.js')
 const controllerAtividade           = require('./controller/atividade/controller_atividade.js')
-
-
+const controllerClassificacao       = require('./controller/classificacao/controller_classificacao.js')
+const controllerPessoa              = require('./controller/pessoa/controller_pessoa.js')
 //Criando um objeto para manipular dados do body da API em formato JSON
 const bodyParserJSON = bodyParser.json()
 
@@ -425,6 +425,117 @@ app.delete('/v1/senai/atividade/:id', async function (req, res){
     //obedecendo a ordem de crição na função da controller
     let result = await controllerAtividade.excluirAtividade(id)
 
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+ 
+//#########################################
+//              CLASSIFICACAO
+//#########################################
+ 
+app.post('/v1/senai/classificacao', bodyParserJSON , async function (req, res){
+ 
+    let dados = req.body
+    let contentType = req.headers['content-type']
+ 
+    let result = await controllerClassificacao.inseirNovaClassificacao(dados, contentType)
+ 
+    res.status(result.status_code).json(result)
+})
+ 
+app.get('/v1/senai/classificacao', async function (req, res){
+ 
+    let result = await controllerClassificacao.listarClassificacao()
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.get('/v1/senai/classificacao/:id', async function (req, res){
+ 
+    let id = req.params.id
+ 
+    let result = await controllerClassificacao.buscarClassificacao(id)
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.put('/v1/senai/classificacao/:id', bodyParserJSON, async function (req, res){
+ 
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+ 
+    let result = await controllerClassificacao.atualizarClassificacao(dados, id, contentType)
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.delete('/v1/senai/classificacao/:id', async function (req, res){
+ 
+    let id = req.params.id
+ 
+    let result = await controllerClassificacao.excluirClassificacao(id)
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+//#########################################
+//              PESSOA
+//#########################################
+ 
+app.post('/v1/senai/pessoa', bodyParserJSON , async function (req, res){
+ 
+    let dados = req.body
+    let contentType = req.headers['content-type']
+ 
+    let result = await controllerPessoa.inseirNovaPessoa(dados, contentType)
+ 
+    res.status(result.status_code).json(result)
+})
+ 
+app.get('/v1/senai/pessoa', async function (req, res){
+ 
+    let result = await controllerPessoa.listarPessoa()
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.get('/v1/senai/pessoa/:id', async function (req, res){
+ 
+    let id = req.params.id
+ 
+    let result = await controllerPessoa.buscarPessoa(id)
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.put('/v1/senai/pessoa/:id', bodyParserJSON, async function (req, res){
+ 
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+ 
+    let result = await controllerPessoa.atualizarPessoa(dados, id, contentType)
+ 
+    res.status(result.status_code)
+    res.json(result)
+})
+ 
+app.delete('/v1/senai/pessoa/:id', async function (req, res){
+ 
+    let id = req.params.id
+ 
+    let result = await controllerPessoa.excluirPessoa(id)
+ 
     res.status(result.status_code)
     res.json(result)
 })

@@ -12,6 +12,9 @@ const config_message = require('../modulo/configMessagens.js')
 // Import do arquivo DAO (Data Access Object) responsável por executar as queries no banco de dados MySQL
 const filmeDAO = require('../../model/DAO/filme/filme.js')
 
+//Import de arquivos de controller
+const controller_classificacao = require('../classificacao/controller_classificacao.js')
+
 
 const inseirNovoFilme = async function (filme, contentType) {
     
@@ -148,6 +151,20 @@ const listarFilme = async function() {
         
         if(result){
             if(result.length > 0){  
+
+                //Percorre o ARRAY  de filmes para indentificar os dados de classificação
+                for(filme of result){
+                    //Busca na contrroller da classifcicacao
+                    let result_classificacao = await controller_classificacao.buscarClassificacao(filme.id_classificacao)
+                    //Se a classificação foi encontrada
+                    if(result_classificacao.status){
+                    //Cria atributo calssificação no filme e adiciona dados referente a classificação
+                    filme.classificacao = result_classificacao.response.classificacao
+                    //Apaga o atributo id_classificacao
+                    delete filme.id_classificacao
+}
+                }
+
                 messageJson.DEFAULT_MESSAGE.status = messageJson.SUCCES_RESPONSE.status
                 messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_RESPONSE.status_code
                 messageJson.DEFAULT_MESSAGE.response.count = result.length
@@ -171,41 +188,48 @@ const listarFilme = async function() {
 
 const buscarFilme = async function(id) {
 
-    // Clona o objeto de mensagens para evitar mutação do objeto original importado
-    // Isso garante que alterações feitas aqui não afetam outras chamadas da função
     let messageJson = JSON.parse(JSON.stringify(config_message))
 
     try {
-        //Válidação para garantir que o id seja válidos
-        if(id == undefined || id == '' || id == null ||  isNaN(id)){
-            messageJson.ERROR_BAD_REQUEST.field = '[ID INVÁLIDO]'
 
+        if(id == undefined || id == '' || id == null || isNaN(id)){
+            messageJson.ERROR_BAD_REQUEST.field = '[ID INVÁLIDO]'
             return messageJson.ERROR_BAD_REQUEST //400
-        }else{
+        } else {
             let result = await filmeDAO.selectByIdFilme(id)
 
             if(result){
                 if(result.length > 0){
-                    messageJson.DEFAULT_MESSAGE.status = messageJson.SUCCES_RESPONSE.status
+
+                    // Percorre o ARRAY de filmes para identificar os dados de classificação
+                    for(let filme of result){
+                        // Busca na controller da classificacao
+                        let result_classificacao = await controller_classificacao.buscarClassificacao(filme.id_classificacao)
+                        // Se a classificação foi encontrada
+                        if(result_classificacao.status){
+                            // Cria atributo classificação no filme e adiciona dados referente a classificação
+                            filme.classificacao = result_classificacao.response.classificacao
+                            // Apaga o atributo id_classificacao
+                            delete filme.id_classificacao
+                        }
+                    }
+
+                    messageJson.DEFAULT_MESSAGE.status      = messageJson.SUCCES_RESPONSE.status
                     messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_RESPONSE.status_code
                     messageJson.DEFAULT_MESSAGE.response.filme = result
 
                     return messageJson.DEFAULT_MESSAGE //200
-                }else{
-                    
-                    
+                } else {
                     return messageJson.ERROR_NOT_FOUND //404
                 }
-            }else{
+            } else {
                 return messageJson.ERROR_INTERNAL_SERVER_MODEL //500 (model)
             }
         }
-            
-        
+
     } catch (error) {
         return messageJson.ERROR_INTERNAL_SERVER_CONTROLLER //500(controller)
     }
-
 }
 
 
@@ -306,6 +330,11 @@ const validarDados = async function(filme) {
         messageJson.ERROR_BAD_REQUEST.field = '[capa] INVÁLIDO'
         return messageJson.ERROR_BAD_REQUEST  // HTTP 400
 
+    // Validação da FK da classificacão
+    }else if (filme.id_classificacao == undefined || filme.id_classificacao == '' || filme.id_classificacao == null ||  isNaN(filme.id_classificacao || filme.id_classificacao <= 0)) {
+
+        messageJson.ERROR_BAD_REQUEST.field = '[id_classificacao] INVÁLIDO'
+        return messageJson.ERROR_BAD_REQUEST  // HTTP 400
 
     }else{
         return false

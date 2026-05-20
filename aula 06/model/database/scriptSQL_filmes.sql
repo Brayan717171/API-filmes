@@ -60,7 +60,7 @@ UPDATE tbl_filme SET id = 3 WHERE id = 5;
 
 
 
-
+desc tbl_classificacao;
 
 update tbl_filme set
 	nome = "Filme 03",
@@ -84,3 +84,31 @@ CREATE TABLE tbl_atividade (
     id int not null primary key auto_increment,
     nome VARCHAR(45)  
 );
+
+
+CREATE TABLE tbl_pessoa (
+    id              INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome            VARCHAR(50)  NOT NULL,
+    data_nascimento DATE         NOT NULL,
+    idade           INT(2)       NOT NULL,
+    id_sexo     	INT          NOT NULL,
+    constraint FK_SEXO_PESSOA #Nome do relacionamento
+    foreign key (id_sexo) #Quem sera fk na tabela
+    references tbl_sexo(id) #de ode vem a FK
+);
+
+create table tbl_sexo (
+	id int not null primary key auto_increment,
+    sigla varchar(3) not null,
+    nome varchar(15) not null
+);
+
+desc tbl_pessoa;
+
+desc tbl_filme;
+
+desc tbl_sexo;
+
+
+select date_format(current_date(), '%d/%m/%Y') as data_formatada;
+
