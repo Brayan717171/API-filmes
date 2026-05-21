@@ -46,7 +46,7 @@ const corsOption = {
     allowedHeaders: ['content-type', 'Authorization'], 
 }
 
-// CORREÇÃO: cors deve ser aplicado ANTES das rotas
+
 app.use(cors(corsOption));
 
 
