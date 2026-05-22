@@ -210,6 +210,9 @@ FROM tbl_filme                                -- ponto de partida: tabela princi
 ORDER BY tbl_filme.nome ASC;
 
 
+select * from tbl_filme_genero;
+select * from tbl_filme;
+select * from tbl_genero;
 
 SELECT 
     tbl_filme.nome AS nome_filme,
