@@ -6,13 +6,7 @@
  * Versão: 1.0
  ***************************************************************************************************************************************************************************************************************************/
 
-// Import do arquivo de padronização de mensagens JSON (status codes, mensagens de erro e sucesso)
-
-
 const config_message = require('../modulo/configMessagens.js')
-
-// Import do arquivo DAO responsável por executar as queries no banco de dados MySQL
-
 const filmeGeneroDAO = require('../../model/DAO/filme_genero/filme_genero.js')
 
 
@@ -22,28 +16,25 @@ const inserirFilmeGenero = async function(filmeGenero) {
     let messageJson = JSON.parse(JSON.stringify(config_message))
 
     try {
-            let validar = await validarDados(filmeGenero)
+        let validar = await validarDados(filmeGenero)
 
-            if(validar){
-                return validar // 400
+        if(validar){
+            return validar // 400
+        } else {
+            let result = await filmeGeneroDAO.incertFilme_genero(filmeGenero)
+
+            if(result){
+                filmeGenero.id = result
+                messageJson.DEFAULT_MESSAGE.status      = messageJson.SUCCES_CREATED_ITEM.status
+                messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_CREATED_ITEM.status_code
+                messageJson.DEFAULT_MESSAGE.message     = messageJson.SUCCES_CREATED_ITEM.message
+                messageJson.DEFAULT_MESSAGE.response    = filmeGenero
+
+                return messageJson.DEFAULT_MESSAGE // 201
             } else {
-
-                let result = await filmeGeneroDAO.incertFilme_genero(filmeGenero)
-
-                if(result){
-                    filmeGenero.id = result
-                    messageJson.DEFAULT_MESSAGE.status      = messageJson.SUCCES_CREATED_ITEM.status
-                    messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_CREATED_ITEM.status_code
-                    messageJson.DEFAULT_MESSAGE.message     = messageJson.SUCCES_CREATED_ITEM.message
-                    messageJson.DEFAULT_MESSAGE.response    = filmeGenero
-
-                    return messageJson.DEFAULT_MESSAGE // 201
-                } else {
-                    return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
-                }
+                return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
             }
-
-         
+        }
 
     } catch (error) {
         return messageJson.ERROR_INTERNAL_SERVER_CONTROLLER // 500
@@ -57,37 +48,32 @@ const atualizarFilmeGenero = async function(filmeGenero, id) {
     let messageJson = JSON.parse(JSON.stringify(config_message))
 
     try {
+        let resultBuscarID = await buscarFilmeGeneroPorId(id)
 
-       
+        if(resultBuscarID.status){
+            let validar = await validarDados(filmeGenero)
 
-            let resultBuscarID = await buscarFilmeGeneroPorId(id)
+            if(!validar){
+                filmeGenero.id = id
 
-            if(resultBuscarID.status){
+                let result = await filmeGeneroDAO.updateFilme_genero(filmeGenero)
 
-                let validar = await validarDados(filmeGenero)
+                if(result){
+                    messageJson.DEFAULT_MESSAGE.status      = messageJson.SUCCES_UPDATED_ITEM.status
+                    messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_UPDATED_ITEM.status_code
+                    messageJson.DEFAULT_MESSAGE.message     = messageJson.SUCCES_UPDATED_ITEM.message
+                    messageJson.DEFAULT_MESSAGE.response    = filmeGenero
 
-                if(!validar){
-                    filmeGenero.id = id
-
-                    let result = await filmeGeneroDAO.updateFilme_genero(filmeGenero)
-
-                    if(result){
-                        messageJson.DEFAULT_MESSAGE.status      = messageJson.SUCCES_UPDATED_ITEM.status
-                        messageJson.DEFAULT_MESSAGE.status_code = messageJson.SUCCES_UPDATED_ITEM.status_code
-                        messageJson.DEFAULT_MESSAGE.message     = messageJson.SUCCES_UPDATED_ITEM.message
-                        messageJson.DEFAULT_MESSAGE.response    = filmeGenero
-
-                        return messageJson.DEFAULT_MESSAGE // 200
-                    } else {
-                        return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
-                    }
+                    return messageJson.DEFAULT_MESSAGE // 200
                 } else {
-                    return validar // 400
+                    return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
                 }
             } else {
-                return resultBuscarID // 400, 404 ou 500
+                return validar // 400
             }
-
+        } else {
+            return resultBuscarID // 400, 404 ou 500
+        }
 
     } catch (error) {
         return messageJson.ERROR_INTERNAL_SERVER_CONTROLLER // 500
@@ -167,7 +153,7 @@ const buscarFilmesPorGenero = async function(idGenero) {
             messageJson.ERROR_BAD_REQUEST.field = '[ID_GENERO INVÁLIDO]'
             return messageJson.ERROR_BAD_REQUEST // 400
         } else {
-            let result = await filmeGeneroDAO.selectByIdFilme_genero(idGenero)
+            let result = await filmeGeneroDAO.selectByIdGenero(idGenero)
 
             if(result){
                 if(result.length > 0){
@@ -201,7 +187,7 @@ const buscarGenerosPorFilme = async function(idFilme) {
             messageJson.ERROR_BAD_REQUEST.field = '[ID_FILME INVÁLIDO]'
             return messageJson.ERROR_BAD_REQUEST // 400
         } else {
-            let result = await filmeGeneroDAO.select(idFilme)
+            let result = await filmeGeneroDAO.selectByIdFilme(idFilme)
 
             if(result){
                 if(result.length > 0){
@@ -217,6 +203,26 @@ const buscarGenerosPorFilme = async function(idFilme) {
             } else {
                 return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
             }
+        }
+
+    } catch (error) {
+        return messageJson.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+    }
+}
+
+
+// Função para deletar todos os gêneros de um filme 
+const deletarGenerosPorFilme = async function(idFilme) {
+
+    let messageJson = JSON.parse(JSON.stringify(config_message))
+
+    try {
+        let result = await filmeGeneroDAO.deleteByIdFilme(idFilme)
+
+        if(result){
+            return messageJson.SUCCES_DELETE_ITEM // 200
+        } else {
+            return messageJson.ERROR_INTERNAL_SERVER_MODEL // 500
         }
 
     } catch (error) {
@@ -281,5 +287,6 @@ module.exports = {
     buscarFilmeGeneroPorId,
     buscarFilmesPorGenero,
     buscarGenerosPorFilme,
+    deletarGenerosPorFilme, 
     excluirFilmeGenero
 }
