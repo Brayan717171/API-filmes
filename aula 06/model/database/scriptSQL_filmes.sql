@@ -170,45 +170,27 @@ insert into tbl_filme_genero(id_filme, id_genero)
 -- ╚══════════════════════════════════════════════════════╝
 SELECT 
     -- ── Dados do filme ──────────────────────────────────
-    tbl_filme.nome        AS nome_filme,       -- apelido para evitar ambiguidade com outros "nome"
-    tbl_filme.sinopse,                         -- resumo da história do filme
-    tbl_filme.duracao,                         -- duração total do filme
+    tbl_filme.nome        AS nome_filme,       
+    tbl_filme.sinopse,                         
+    tbl_filme.duracao,                         -
 
     -- ── Dados da classificação etária ───────────────────
-    tbl_classificacao.nome AS nome_classificacao, -- ex: "Livre", "Maiores de 18"
-    tbl_classificacao.sigla,                      -- ex: "L", "12", "14", "16", "18"
-    tbl_classificacao.descricao,                  -- motivo da classificação (violência, etc)
+    tbl_classificacao.nome AS nome_classificacao,
+    tbl_classificacao.sigla,                     
 
     -- ── Dados do gênero ─────────────────────────────────
-    tbl_genero.nome AS nome_genero            -- ex: "Ação", "Comédia", "Terror"
-                                              -- pode vir NULL se o filme não tiver gênero
+    tbl_genero.nome AS nome_genero            
 
 FROM tbl_filme                                -- ponto de partida: tabela principal
 
-    -- ── 1º JOIN: classificação etária ───────────────────
-    -- relacionamento 1:N — um filme tem uma classificação
-    -- como é INNER, filmes sem classificação ficam fora do resultado
     INNER JOIN tbl_classificacao
         ON tbl_classificacao.id = tbl_filme.id_classificacao
 
-    -- ── 2º JOIN: tabela intermediária de gêneros ────────
-    -- tbl_filme_genero existe pois um filme pode ter vários gêneros
-    -- e um gênero pode pertencer a vários filmes (N:N)
-    -- LEFT JOIN: mantém filmes que ainda não têm gênero associado
     LEFT JOIN tbl_filme_genero
         ON tbl_filme.id = tbl_filme_genero.id_filme
-
-    -- ── 3º JOIN: gênero ─────────────────────────────────
-    -- completa a travessia: tbl_filme → tbl_filme_genero → tbl_genero
-    -- LEFT JOIN aqui é obrigatório para manter o efeito do LEFT JOIN anterior
-    -- se fosse INNER JOIN, filmes sem gênero seriam excluídos mesmo assim
     LEFT JOIN tbl_genero
         ON tbl_genero.id = tbl_filme_genero.id_genero
-
--- ── Ordenação ───────────────────────────────────────────
--- ordena os filmes de A → Z pelo nome
 ORDER BY tbl_filme.nome ASC;
-
 
 select * from tbl_filme_genero;
 select * from tbl_filme;
@@ -218,11 +200,19 @@ SELECT
     tbl_filme.nome AS nome_filme,
     tbl_genero.nome AS nome_genero
 FROM tbl_filme
-    -- LEFT JOIN para manter filmes SEM gênero no resultado
     LEFT JOIN tbl_filme_genero
         ON tbl_filme.id = tbl_filme_genero.id_filme
     LEFT JOIN tbl_genero
         ON tbl_genero.id = tbl_filme_genero.id_genero
--- WHERE deve vir antes do ORDER BY
+
 WHERE tbl_filme_genero.id_filme IS NULL  -- filtra apenas os sem gênero
 ORDER BY tbl_genero.nome;                -- agora o ORDER BY vem por último
+
+
+
+
+
+
+
+
+
