@@ -1,218 +1,212 @@
-#cria database do projeto de filmes
-create database db_filmes_20261_a;
+-- ============================================================
+--  projeto: api-filmes
+--  script corrigido e organizado do banco de dados
+--  ordem: criação do banco -> tabelas sem dependência ->
+--         tabelas com fk -> tabela intermediária -> dados (seed)
+-- ============================================================
 
-#ativa ao o uso database de filmes
-use  db_filmes_20261_a;
-#cria a tabela de filme
-create table tbl_filme (
-	id int not null primary key auto_increment,
-    nome varchar(80) not null,
-    data_lancamento date not null,
-    duracao time not null,
-    sinopse text not null,
-    avaliacao decimal(3,2) default null,
-    valor decimal(5,2) not null default 0,
-    capa varchar(255)
-);
+-- ------------------------------------------------------------
+-- 1. criação e seleção do banco de dados
+-- ------------------------------------------------------------
+create database if not exists db_filmes_20261_a;
+use db_filmes_20261_a;
 
-show tables;
-
-#Inseir dados
-insert into tbl_filme (
-	nome,
-    data_lancamento,
-    duracao, 
-    sinopse, 
-    avaliacao, 
-    valor, 
-    capa
-    )
-values (
-	'Super Mario galaxy: o Filme',
-	'2026-04-02',
-	'01:39:00',
-	'Uma nova aventura leva Mario a enfrentar um inédito e ameaçador super vilão. Em Super Mario Galaxy:
-	O Filme, o bigodudo encanador italiano e seus aliados embarcam numa aventura galáctica repleta de ação
-	e momentos emocionantes depois de salvar o Reino dos Cogumelos.',
-	'3', 
-	'50.70',
-	'https://br.web.img3.acsta.net/c_310_420/img/5b/ea/5bea1aeac3323aeaaf82449a34fafbbf.jpg'
-    );
-						#2 Regras sobre values:
-			#colocar na mesma ordem dos atributos. Para evitar erros seguir a ordem da criação da tbl
-			#todos os values deve ser colado entre ''(simples) menos do tipo INT
-
-#Seleciona todas as colunas da tbl_filme, trás todos os dados da tabela
-select * from tbl_filme;
-
--- delete pelo (id 0 deleta todos os dados da tabela)
-DELETE FROM tbl_filme WHERE id > 0;
-
--- delete pelo id do que você quer remover 
-DELETE FROM tbl_filme 
-WHERE id = 11;
-
--- Atualiza o ID do registro desejado
--- WHERE id = 4        → identifica o registro atual (The Circus)
--- SET id = 2          → define o novo ID que será atribuído
---  O novo ID (2) não pode estar em uso por outro registro, senão dará erro de chave duplicada
-UPDATE tbl_filme SET id = 3 WHERE id = 5;
-
-
-
-desc tbl_classificacao;
-
-update tbl_filme set
-	nome = "Filme 03",
-	data_lancamento =  "2016-06-10", 
-	duracao = "01:34:00",
-	sinopse = "testando update de banco de dados. ",
-	avaliacao ="2",
-	valor = "100.50",
-	capa = "wadwwawdd"
-where id = 12;
-
-show tables;
-CREATE TABLE tbl_nacionalidade (
-    id int not null primary key auto_increment,
-    nome VARCHAR(50) 
-);
-
-
-
-CREATE TABLE tbl_atividade (
-    id int not null primary key auto_increment,
-    nome VARCHAR(45)  
-);
-
-
-CREATE TABLE tbl_pessoa (
-    id              INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nome            VARCHAR(50)  NOT NULL,
-    data_nascimento DATE         NOT NULL,
-    idade           INT(2)       NOT NULL,
-    id_sexo     	INT          NOT NULL,
-    constraint FK_SEXO_PESSOA #Nome do relacionamento
-    foreign key (id_sexo) #Quem sera fk na tabela
-    references tbl_sexo(id) #de ode vem a FK
-);
+-- ------------------------------------------------------------
+-- 2. tabelas sem dependência (podem ser criadas em qualquer ordem)
+-- ------------------------------------------------------------
 
 create table tbl_sexo (
-	id int not null primary key auto_increment,
-    sigla varchar(3) not null,
-    nome varchar(15) not null
+    id    int         not null auto_increment primary key,
+    sigla varchar(3)  not null,
+    nome  varchar(15) not null
 );
 
-desc tbl_pessoa;
+create table tbl_nacionalidade (
+    id   int         not null auto_increment primary key,
+    nome varchar(50) not null
+);
 
-desc tbl_filme;
+create table tbl_atividade (
+    id   int         not null auto_increment primary key,
+    nome varchar(45) not null
+);
 
-desc tbl_sexo;
-----------------------------------------------------------------------------------------------------------
--- Busca nome, data de lançamento, sinopse e sigla de classificação dos filmes
--- INNER JOIN: retorna APENAS filmes que possuem uma classificação cadastrada
--- Filmes sem classificação e classificações sem filmes são EXCLUÍDOS do resultado
+create table tbl_classificacao (
+    id        int          not null auto_increment primary key,
+    nome      varchar(50)  not null,
+    sigla     varchar(5)   not null,
+    descricao varchar(200) not null
+);
 
-SELECT tbl_filme.nome, 
-       tbl_filme.data_lancamento, 
-       tbl_filme.sinopse,
-       tbl_classificacao.sigla 
-FROM tbl_filme 
-     INNER JOIN tbl_classificacao
-        ON tbl_classificacao.id = tbl_filme.id_classificacao;
-        -- Condição de junção: chave primária de classificacao = chave estrangeira em filme
-----------------------------------------------------------------------------------------------------------
-        
-        
--- Busca os mesmos campos, mas com comportamento diferente
--- A tabela ESQUERDA agora é tbl_classificacao (posição invertida em relação à query 1)
--- LEFT JOIN: retorna TODAS as classificações, mesmo sem filmes associados
--- Para classificações sem filmes, as colunas de tbl_filme virão como NULL
+create table tbl_genero (
+    id   int         not null auto_increment primary key,
+    nome varchar(50) not null
+);
 
-SELECT tbl_filme.nome, 
-       tbl_filme.data_lancamento, 
-       tbl_filme.sinopse,
-       tbl_classificacao.sigla 
-FROM  tbl_classificacao              -- tabela esquerda (dominante)
-      LEFT JOIN tbl_filme            -- tabela direita (pode ter NULLs)
-        ON tbl_classificacao.id = tbl_filme.id_classificacao;
+create table tbl_personagem (
+    id   int         not null auto_increment primary key,
+    nome varchar(80) not null
+);
 
-----------------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------
+-- 3. tabelas com fk simples (1:n)
+-- ------------------------------------------------------------
 
--- RIGHT JOIN: tabela DIREITA é a dominante (tbl_filme)
--- Retorna TODOS os filmes, mesmo sem classificação cadastrada
--- Filmes sem classificação terão sigla como NULL
+-- pessoa depende de sexo
+create table tbl_pessoa (
+    id              int         not null auto_increment primary key,
+    nome            varchar(50) not null,
+    data_nascimento date        not null,
+    idade           int(2)      not null,
+    id_sexo         int         not null,
+    constraint fk_sexo_pessoa
+        foreign key (id_sexo)
+        references tbl_sexo (id)
+);
 
-SELECT tbl_filme.nome, 
-       tbl_filme.data_lancamento, 
-       tbl_filme.sinopse,
-       tbl_classificacao.sigla 
-FROM tbl_classificacao                -- tabela esquerda (pode ter NULLs)
-     RIGHT JOIN tbl_filme             -- tabela direita (dominante)
-        ON tbl_classificacao.id = tbl_filme.id_classificacao;
+-- filme depende de classificação
+create table tbl_filme (
+    id                int           not null auto_increment primary key,
+    nome              varchar(80)   not null,
+    data_lancamento   date          not null,
+    duracao           time          not null,
+    sinopse           text          not null,
+    avaliacao         decimal(3,2)  default null,
+    valor             decimal(5,2)  not null default 0,
+    capa              varchar(255),
+    id_classificacao  int           not null,
+    constraint fk_classificacao_filme
+        foreign key (id_classificacao)
+        references tbl_classificacao (id)
+);
 
+-- ------------------------------------------------------------
+-- 4. tabela intermediária (relacionamento n:n filme <-> gênero)
+-- ------------------------------------------------------------
+create table tbl_filme_genero (
+    id        int not null auto_increment primary key,
+    id_filme  int not null,
+    id_genero int not null,
+    constraint fk_filme_filmegenero
+        foreign key (id_filme)
+        references tbl_filme (id),
+    constraint fk_genero_filmegenero
+        foreign key (id_genero)
+        references tbl_genero (id)
+);
 
-select * from tbl_filme;
-select * from tbl_genero;
-select * from tbl_filme_genero;
-select * from tbl_classificacao;
+-- ============================================================
+-- 5. inserts (dados de exemplo / seed)
+--    respeitando a ordem: classificação e gênero antes de filme,
+--    filme antes de filme_genero.
+-- ============================================================
 
-insert into tbl_filme_genero(id_filme, id_genero)
-							values(23, 2),
-								  (24, 1),
-								  (25, 5),
-                                  (26, 6),
-                                  (27, 7);
-                                  
--- ╔══════════════════════════════════════════════════════╗
--- ║         CONSULTA COMPLETA DE FILMES                  ║
--- ║  Retorna filmes com sua classificação etária e gênero║
--- ╚══════════════════════════════════════════════════════╝
-SELECT 
-    -- ── Dados do filme ──────────────────────────────────
-    tbl_filme.nome        AS nome_filme,       
-    tbl_filme.sinopse,                         
-    tbl_filme.duracao,                         -
+-- sexo
+insert into tbl_sexo (sigla, nome) values
+    ('m', 'masculino'),
+    ('f', 'feminino');
 
-    -- ── Dados da classificação etária ───────────────────
-    tbl_classificacao.nome AS nome_classificacao,
-    tbl_classificacao.sigla,                     
+-- classificação indicativa
+insert into tbl_classificacao (nome, sigla, descricao) values
+    ('livre',        'l',   'recomendado para todos os públicos'),
+    ('dez anos',     '10',  'não recomendado para menores de 10 anos'),
+    ('doze anos',    '12',  'não recomendado para menores de 12 anos'),
+    ('quatorze anos','14',  'não recomendado para menores de 14 anos');
 
-    -- ── Dados do gênero ─────────────────────────────────
-    tbl_genero.nome AS nome_genero            
+-- gênero
+insert into tbl_genero (nome) values
+    ('ação'),
+    ('aventura'),
+    ('comédia'),
+    ('drama'),
+    ('animação'),
+    ('fantasia'),
+    ('ficção científica');
 
-FROM tbl_filme                                -- ponto de partida: tabela principal
+-- filme (id_classificacao precisa existir em tbl_classificacao)
+insert into tbl_filme (
+    nome,
+    data_lancamento,
+    duracao,
+    sinopse,
+    avaliacao,
+    valor,
+    capa,
+    id_classificacao
+) values (
+    'super mario galaxy: o filme',
+    '2026-04-02',
+    '01:39:00',
+    'uma nova aventura leva mario a enfrentar um inédito e ameaçador super vilão. em super mario galaxy: o filme, o bigodudo encanador italiano e seus aliados embarcam numa aventura galáctica repleta de ação e momentos emocionantes depois de salvar o reino dos cogumelos.',
+    3.0,
+    50.70,
+    'https://br.web.img3.acsta.net/c_310_420/img/5b/ea/5bea1aeac3323aeaaf82449a34fafbbf.jpg',
+    1
+);
 
-    INNER JOIN tbl_classificacao
-        ON tbl_classificacao.id = tbl_filme.id_classificacao
+-- relação filme <-> gênero (tabela intermediária)
+-- ex.: o filme de id 1 pertence aos gêneros aventura (2) e comédia (3)
+insert into tbl_filme_genero (id_filme, id_genero) values
+    (1, 2),
+    (1, 3);
 
-    LEFT JOIN tbl_filme_genero
-        ON tbl_filme.id = tbl_filme_genero.id_filme
-    LEFT JOIN tbl_genero
-        ON tbl_genero.id = tbl_filme_genero.id_genero
-ORDER BY tbl_filme.nome ASC;
+-- ============================================================
+-- 6. consultas de referência (apenas leitura, não fazem parte
+--    da criação do banco — rode-as separadamente quando precisar)
+-- ============================================================
 
-select * from tbl_filme_genero;
-select * from tbl_filme;
-select * from tbl_genero;
+-- 6.1 filmes com classificação (inner join: só filmes com classificação)
+-- select tbl_filme.nome,
+--        tbl_filme.data_lancamento,
+--        tbl_filme.sinopse,
+--        tbl_classificacao.sigla
+-- from tbl_filme
+--     inner join tbl_classificacao
+--         on tbl_classificacao.id = tbl_filme.id_classificacao;
 
-SELECT 
-    tbl_filme.nome AS nome_filme,
-    tbl_genero.nome AS nome_genero
-FROM tbl_filme
-    LEFT JOIN tbl_filme_genero
-        ON tbl_filme.id = tbl_filme_genero.id_filme
-    LEFT JOIN tbl_genero
-        ON tbl_genero.id = tbl_filme_genero.id_genero
+-- 6.2 todas as classificações, mesmo sem filme (left join a partir de classificação)
+-- select tbl_filme.nome,
+--        tbl_filme.data_lancamento,
+--        tbl_filme.sinopse,
+--        tbl_classificacao.sigla
+-- from tbl_classificacao
+--     left join tbl_filme
+--         on tbl_classificacao.id = tbl_filme.id_classificacao;
 
-WHERE tbl_filme_genero.id_filme IS NULL  -- filtra apenas os sem gênero
-ORDER BY tbl_genero.nome;                -- agora o ORDER BY vem por último
+-- 6.3 todos os filmes, mesmo sem classificação (right join)
+-- select tbl_filme.nome,
+--        tbl_filme.data_lancamento,
+--        tbl_filme.sinopse,
+--        tbl_classificacao.sigla
+-- from tbl_classificacao
+--     right join tbl_filme
+--         on tbl_classificacao.id = tbl_filme.id_classificacao;
 
+-- 6.4 consulta completa: filme + classificação + gênero
+-- select
+--     tbl_filme.nome         as nome_filme,
+--     tbl_filme.sinopse,
+--     tbl_filme.duracao,
+--     tbl_classificacao.nome as nome_classificacao,
+--     tbl_classificacao.sigla,
+--     tbl_genero.nome        as nome_genero
+-- from tbl_filme
+--     inner join tbl_classificacao
+--         on tbl_classificacao.id = tbl_filme.id_classificacao
+--     left join tbl_filme_genero
+--         on tbl_filme.id = tbl_filme_genero.id_filme
+--     left join tbl_genero
+--         on tbl_genero.id = tbl_filme_genero.id_genero
+-- order by tbl_filme.nome asc;
 
-
-
-
-
-
-
-
+-- 6.5 filmes que ainda não têm gênero cadastrado (anti join)
+-- select
+--     tbl_filme.nome as nome_filme,
+--     tbl_genero.nome as nome_genero
+-- from tbl_filme
+--     left join tbl_filme_genero
+--         on tbl_filme.id = tbl_filme_genero.id_filme
+--     left join tbl_genero
+--         on tbl_genero.id = tbl_filme_genero.id_genero
+-- where tbl_filme_genero.id_filme is null
+-- order by tbl_genero.nome;

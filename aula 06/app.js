@@ -60,7 +60,7 @@ app.post('/v1/senai/locadora/filme', bodyParserJSON , async function (req, res){
 
     let contentType = req.headers['content-type']
 
-    let result = await controllerFilme.inserirNovoFilme(dados, contentType)
+    let result = await controllerFilme.inseirNovoFilme(dados, contentType)
 
     res.status(result.status_code).json(result)
 
